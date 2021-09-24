@@ -1,19 +1,17 @@
-Krilya is a small encryption utility. 
+# Krilya
+Krilya is a small encryption utility that I created when deciding to tackle the idea of encryption. This contains the krilya library and also a command line python file called `run.py` than can be used to encode, decode or generate keys.  
 
-Key Gen
-=======
+### Key Gen
 In theory a key can be anything that can be loaded in as text, as default there is a 
 small keygen function to create a long string of characters of 64 length or any powers
-of two.
+of two i.e 64, 128, 512, 1024, 2048, 4096.
 
-Key Chains
-==========
+### Key Chains
 A key chain is just the key broken up into multiple rows and columns, a multidimensional matrix,
 this is so a password can shuffle the key chain if using a password, which will muddle up the 
 rows and the col positions.
 
-Encoding
-========
+### Encoding
 Encoding works by taking the first int character in the source string, can be binary which means
 the char will already be represented by the digit. It adds the character int of the first position
 of the keychain to it (this is called the shift position which always begins at [0][0] and then multiplies by it. 
@@ -64,11 +62,10 @@ The Krilya app by default will take that and turn it into binary and then ZLIB c
 file.
 
 This can include any characters, it can encrypt en entire PDF file containing War and Peace in Russian
-Cyrillic characters, a manifesto written in Chinese an MP3, you name it.
+Cyrillic characters, a manifesto written in Chinese an MP3 etc... 
 
 
-Decoding
-========
+### Decoding
 Decoding is quite simple, all we do is we convert the text again until we get our hex numbers, so let's
 say we've imported the the text from the file 0x40090x1E460x53AC0x4D8F0x1F72 decompressed by ZLIB from
 binary, we then begin with the first position of the key chain again.
@@ -87,14 +84,13 @@ So provided we have a decent length key with all sorts of characters in it, we c
 encryption. This is also compounded with the use of a password, which will roll the position of the
 key chain, which will be explained next.
 
-Password
-========
+### Password
 A password can be provided along with the key, the password performs a shuffle of the key chain.
 It does it by taking every odd character and moving the table up n amount of times, and every even
 character it moves every column in each row across n amount of times.
 N is equal to the number representation of the character with a modulus of 256 or whatever modulus
 is provided. This means that all characters could be used to represent a password without causing
-the process to take to long.
+the process to take too long.
 
 Shuffling up on an odd character means poping the key chain and pushing it to the front of the list.
 Shuffling across on an even character means poping each column position of each key chain row to the front of each list.
@@ -104,6 +100,5 @@ What this will do is completely randomize the key chain, not only will you need 
 file, you will also need a password.
 
 
-Public/Private Keys
-===================
+### Public/Private Keys
 This hasn't been implemented...
