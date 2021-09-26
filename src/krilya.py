@@ -263,9 +263,9 @@ class Krilya():
                 decoding = bytearray(self.decode(uncompressed.decode(), binary=True, key=key, password=password))
             except ValueError as e:
                 if password:
-                    raise Exception("Value Error decoding source, this could mean your password is incorrect")
+                    raise Exception("Value Error decoding source, double check to make sure password or key is correct")
                 else:
-                    raise e
+                    raise Exception("Value Error decoding source, double check to make sure you are using the correct key")
 
         if decoding:
             if target:
