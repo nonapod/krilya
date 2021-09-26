@@ -52,8 +52,12 @@ if __name__ == "__main__":
             k = Krilya()
 
             # Generate a new key if none has been already.
+            key = ""
             if not encode_args.key:
-                k.key = k.keygen()
+                key = k.keygen()
+            else: 
+                with open(encode_args.key) as keyfile:
+                    key = "".join([line.rstrip() for line in keyfile.readlines()])
 
             if encode_args.output:
                 print("Output will be written to {}\n".format(encode_args.output))
@@ -62,7 +66,7 @@ if __name__ == "__main__":
             if not encode_args.key:
                 print("\nA new key was generated, save this to decode later:\n{} \n".format(k.key))
 
-            encoded = k.encodeFile(encode_args.input, target=encode_args.output, key=encode_args.key, password=encode_args.password)
+            encoded = k.encodeFile(encode_args.input, target=encode_args.output, key=key, password=encode_args.password)
 
         # Encode if we have text.
         elif encode_args.text:
@@ -70,9 +74,12 @@ if __name__ == "__main__":
 
             # Generate a new key if none has been already.
             if not encode_args.key:
-                k.key = k.keygen()
+                key = k.keygen()
+            else:
+                with open(encode_args.key) as keyfile:
+                    key = "".join([line.rstrip() for line in keyfile.readlines()])
 
-            encoded = k.encode(encode_args.text, binary=False, key=encode_args.key, password=encode_args.password)
+            encoded = k.encode(encode_args.text, binary=False, key=key, password=encode_args.password)
             if not encode_args.silent:
                 print("The text was encoded as followed:")
                 print(encoded)
@@ -100,12 +107,19 @@ if __name__ == "__main__":
             if not decode_args.output:
                 exit("The output file option is required -o (--output) when decoding a file.")
             k = Krilya()
-            k.decodeFile(decode_args.input, decode_args.output, decode_args.key, decode_args.password)
+
+            key = ""
+            with open(decode_args.key) as keyfile:
+                key = "".join([line.rstrip() for line in keyfile.readlines()])
+            k.decodeFile(decode_args.input, decode_args.output, key, decode_args.password)
             print("File saved to {}".format(decode_args.output))
             exit()
         elif decode_args.text:
             k = Krilya()
-            decoded = k.decode(decode_args.text, False, decode_args.key, decode_args.password)
+            key = ""
+            with open(decode_args.key) as keyfile:
+                key = "".join([line.rstrip() for line in keyfile.readlines()])
+            decoded = k.decode(decode_args.text, False, key, decode_args.password)
             if not decode_args.silent:
                 print("The text was decoded as followed:")
                 print(decoded)
