@@ -81,7 +81,7 @@ class TestKrilya(unittest.TestCase):
                 self.assertTrue(len(key) == item)
         
         for item in [111, 411, 677]:
-            # Generate the a bad test key.
+            # Generate a bad test key.
             key = krilya.keygen(item, target=bad_key_path)
             self.assertFalse(os.path.isfile(bad_key_path))
     
@@ -236,15 +236,6 @@ class TestKrilya(unittest.TestCase):
         decoded_hash = decoded_md5.hexdigest()
 
         self.assertTrue(decoded_hash == original_hash)
-
-
-        
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
