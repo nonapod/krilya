@@ -1,3 +1,5 @@
+[![Build Status](https://app.travis-ci.com/nonapod/krilya.svg?branch=main)](https://app.travis-ci.com/nonapod/krilya)
+
 # Krilya
 Krilya is a small encryption utility that I created when deciding to tackle the idea of encryption. This contains the krilya library and also a command line python file called `run.py` than can be used to encode, decode or generate keys.  
 
