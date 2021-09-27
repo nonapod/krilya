@@ -58,10 +58,10 @@ class TestKrilya(unittest.TestCase):
         self.assertTrue(isinstance(key, str) and len(key) == 1024)
 
         key = kriliya.keygen(271)
-        self.assertTrue(not isinstance(key, str))
+        self.assertFalse(isinstance(key, str))
 
         key = kriliya.keygen(333)
-        self.assertTrue(not isinstance(key, str))
+        self.assertFalse(isinstance(key, str))
 
     def test_keygen_to_file(self):
         """
