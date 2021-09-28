@@ -4,6 +4,21 @@ import zlib
 import argparse
 import sys
 
+# todo: add a padding always to the end of the file, a numerical length of 64 chars 
+# including some representation of the content. This will be considered as a seed
+# that will be used to shuffle the keychain accordingly, any password will be applied
+# following.
+#
+# todo: maybe have the number that is generated from a portion of the content actually
+#       change the values of each matrix character itself, so it runs through each
+#       character and increases/decreases the int value of the char to a max of 255,
+#       so that even when the password is applied, it is applied to an entirely different
+#       key each time based off of the content/string, so that even adding a space to
+#       the end will result in an entirely different result.
+#
+#       maybe just generate a random string again and apply as an additional password,
+#       so every encoding is different each time, even if the string changes.
+
 class Krilya():
     """
     Krilya is an encryption utility
@@ -13,8 +28,10 @@ class Krilya():
         self.key_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+='
         self.key = ''
         self.key_chain_table_size = 10
-        self.password_mod = 256 # a password character i.e a Russian character of 1023 for instance
-                                # will get the modulus from the ascii table.
+        self.password_mod = 256      # a password character i.e a Russian character of 1023 for instance
+                                     # will get the modulus from the ascii table.
+        self.random_buffer_len = 512 # a random buffer that will be appended to the end of the encoding
+                                     # and extracted from the end of each decoding.
 
         for key in kwargs:
             if hasattr(self, key):
@@ -35,8 +52,6 @@ class Krilya():
             key = self.key
         assert key
 
-        key_chain = self.keychain(key=key, password=password)
-
         source = source.split("0x")
         if binary:
             decoded_source = []
@@ -45,6 +60,15 @@ class Krilya():
         chain_row = 0
         chain_pos = 0
         shift = 0
+
+        buffer_str = ""
+        random_buffer = source[-self.random_buffer_len:]
+        source = source[:-self.random_buffer_len]
+        for ch in random_buffer:
+            char_code = chr(int(ch, 16))
+            buffer_str += "%s" % (char_code)
+
+        key_chain = self.keychain(key=key, password=password, buffer=buffer_str)
 
         for ch in source:
             if ch:
@@ -84,7 +108,9 @@ class Krilya():
             key = self.key
         assert key
 
-        key_chain = self.keychain(key=key, password=password)
+        random_buffer = "".join(random.choice(self.key_chars) for _ in range(self.random_buffer_len))
+        key_chain = self.keychain(key=key, password=password, buffer=random_buffer)
+
         if binary:
             encoded_source = []
         else:
@@ -115,6 +141,11 @@ class Krilya():
                 encoded_source.append(encoded_char)
             else:
                 encoded_source += "%s" % (encoded_char)
+
+        # Loop each buffer character and add it to the encoded source.
+        if random_buffer:
+            for ch in random_buffer:
+                encoded_source += "%s" % (hex(ord(ch)))
 
         return encoded_source
 
@@ -178,14 +209,16 @@ class Krilya():
         return key
 
 
-    def keychain(self, key="", password=""):
+    def keychain(self, key="", password="", buffer=""):
         """
         creates an even sized keychain based off of the current key.
         what is a keychain? a keychain is essentially the key just
         broken out into sets of rows in the form of a list. the
         keychain can be shuffled or rolled around during encoding/decoding
         when using a password.
+        :parma key: The key string.
         :param password: string an optional password which will shuffle the chain
+        :param buffer: A buffer string to apply to the keychain, it will reshuffle according to this.
         :return: list
         """
         if not key:
@@ -214,6 +247,21 @@ class Krilya():
                         key_chain.insert(0, key_chain.pop())
                     across = not across
                     ch-=1
+
+        # do the same with the buffer as with the password.
+        if buffer:
+            across = 0
+            for ch in [ord(i) % self.password_mod for i in list(buffer)]:
+                while ch > 0:
+                    if across:
+                        for key_chain_row_idx, key_chain_row in enumerate(key_chain):
+                            key_chain[key_chain_row_idx].insert(0, key_chain[key_chain_row_idx].pop())
+                    else:
+                        key_chain.insert(0, key_chain.pop())
+                    across = not across
+                    ch-=1
+
+
 
         return key_chain
 
