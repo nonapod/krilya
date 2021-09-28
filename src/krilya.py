@@ -25,13 +25,14 @@ class Krilya():
     """
 
     def __init__(self, **kwargs):
-        self.key_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+='
+        self.key_chars = ''.join([chr(i) for i in range(33,126)])
         self.key = ''
         self.key_chain_table_size = 10
         self.password_mod = 256      # a password character i.e a Russian character of 1023 for instance
                                      # will get the modulus from the ascii table.
-        self.random_buffer_len = 512 # a random buffer that will be appended to the end of the encoding
+        self.random_buffer_len = 16  # a random buffer that will be appended to the end of the encoding
                                      # and extracted from the end of each decoding.
+        self.random_buffer_chars = ''.join([chr(i) for i in range(1,255)]) # complete ascii charset as buffer chars.
 
         for key in kwargs:
             if hasattr(self, key):
@@ -39,9 +40,13 @@ class Krilya():
 
     def decode(self, source, binary=False, key="", password=""):
         """
-        decodes the source text. binary mode can be set if we want
-        the result to be an array of binary ints. an key can be used
-        optionally otherwise it defaults to the instance key.
+        Decodes the source text. Binary mode can be set if we want
+        the result to be an array of binary ints. An key can be used
+        optionally otherwise it defaults to the instance key. The
+        random buffer key of n characters (dictated by the instance
+        buffer length variable) will be extracted from the source
+        and used to shuffle the keychain.
+
         :param source: string the source string
         :param binary: boolean whether or not we want an array of digits returned or not for use in binary.
         :param key: string optional key or else uses instance key
@@ -61,6 +66,8 @@ class Krilya():
         chain_pos = 0
         shift = 0
 
+        # Get the buffer string at the end of the encoded source, that will be 
+        # applied to the keychain.
         buffer_str = ""
         random_buffer = source[-self.random_buffer_len:]
         source = source[:-self.random_buffer_len]
@@ -93,11 +100,14 @@ class Krilya():
 
     def encode(self, source, binary=False, key="", password=""):
         """
-        encode either in binary or regular text format, binary
-        is preferable. takes in text and returns it either an
-        encrypted string or an array of ints if in binary mode. a
+        Encode either in binary or regular text format, binary
+        is preferable. Takes in text and returns it either an
+        encrypted string or an array of ints if in binary mode. A
         key can be passed optionally or else the current instance
-        key will be used.
+        key will be used. A random buffer array of n characters long, 
+        dictated by the instance, will be appended to the end of 
+        the file and used for an additional random key shuffle.
+
         :param source: string the source string
         :param binary: boolean whether or not we want an array of digits returned or not for use in binary.
         :param key: string optional key or else uses instance key
@@ -108,7 +118,7 @@ class Krilya():
             key = self.key
         assert key
 
-        random_buffer = "".join(random.choice(self.key_chars) for _ in range(self.random_buffer_len))
+        random_buffer = "".join(random.choice(self.random_buffer_chars) for _ in range(self.random_buffer_len))
         key_chain = self.keychain(key=key, password=password, buffer=random_buffer)
 
         if binary:

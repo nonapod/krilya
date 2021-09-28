@@ -1,4 +1,5 @@
 import argparse
+import zlib
 from src.krilya import Krilya
 
 if __name__ == "__main__":
@@ -79,13 +80,16 @@ if __name__ == "__main__":
                 with open(encode_args.key) as keyfile:
                     key = "".join([line.rstrip() for line in keyfile.readlines()])
 
-            encoded = k.encode(encode_args.text, binary=False, key=key, password=encode_args.password)
+            if encode_args.output:
+                encoded = k.encode(encode_args.text, binary=False, key=key, password=encode_args.password)
+            else:
+                encoded = k.encode(encode_args.text, binary=False, key=key, password=encode_args.password)
             if not encode_args.silent:
                 print("The text was encoded as followed:")
                 print(encoded)
             if encode_args.output:
-                with open(encode_args.output, "w+") as output:
-                    output.writelines(encoded)
+                with open(encode_args.output, "wb+") as output:
+                    output.write(zlib.compress(encoded.encode()))
             if not encode_args.key:
                 print("\nA new key was generated, save this to decode later:\n{} \n".format(k.key))
 

@@ -13,6 +13,13 @@ A key chain is just the key broken up into multiple rows and columns, a multidim
 this is so a password can shuffle the key chain if using a password, which will muddle up the 
 rows and the col positions.
 
+### Random Buffer String
+A random buffer string of n characters long (16 by default and any character in the 255 ascii set) 
+is generated before every encoding, it is used to further shuffle the keychain. After the coding 
+is complete, the buffer string is appended to the end of the file and used to shuffle the keychain
+accordingly upon decoding, this ensures that every encoding should be unique enough that encoding
+the same data several times over will yield a completely different result every time.
+
 ### Encoding
 Encoding works by taking the first int character in the source string, can be binary which means
 the char will already be represented by the digit. It adds the character int of the first position
